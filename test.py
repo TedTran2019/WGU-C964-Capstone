@@ -17,7 +17,7 @@ correlation_matrix = housing.corr()
 
 # All features have an importance score of more than .01, so I won't drop any
 features = housing.drop('MedHouseVal', axis=1)
-target = housing[['MedHouseVal']]
+target = housing['MedHouseVal']
 
 def regression(features, target, model):
     features_train, features_test, target_train, target_test = model_selection.train_test_split(
