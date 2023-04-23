@@ -14,14 +14,16 @@ import pandas as pd
 housing = fetch_california_housing(as_frame=True).frame
 
 correlation_matrix = housing.corr()
+random_state = 964
 
 # All features have an importance score of more than .01, so I won't drop any
 features = housing.drop('MedHouseVal', axis=1)
+min_features = housing[['MedInc', 'AveRooms', 'Latitude', 'Longitude']]
 target = housing['MedHouseVal']
 
 def regression(features, target, model):
     features_train, features_test, target_train, target_test = model_selection.train_test_split(
-        features, target, test_size=0.3, random_state=964)
+        features, target, test_size=0.3, random_state=random_state)
     model.fit(features_train, target_train) # Unnecessary if used grid_search
     # Importances can be plotted with a bar chart
     # importances = model.feature_importances_
@@ -46,8 +48,8 @@ housing.head() # First 5 rows of the data
 # A histogram or distribution plot would show that the data is skewed
 housing.describe() # Describes the dataset
 
-# A heatmap or scatter plots would be nice to show correlations as well
 # %%
+# A heatmap or scatter plots would be nice to show correlations as well
 print(correlation_matrix)
 # %%
 print(correlation_matrix['MedHouseVal'].sort_values(ascending=False))
@@ -57,8 +59,8 @@ print(correlation_matrix['MedHouseVal'].sort_values(ascending=False))
 # Grid ensures optimal, but can take forever. Randomized is faster, but not optimal
 def grid_search(features, target, model, param_grid):
     features_train, features_test, target_train, target_test = model_selection.train_test_split(
-        features, target, test_size=0.3, random_state=964)
-    grid_search = model_selection.GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')
+        features, target, test_size=0.3, random_state=random_state)
+    grid_search = model_selection.GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error', random_state=random_state)
     grid_search.fit(features_train, target_train)
     print(grid_search.best_params_)
     print(np.sqrt(-grid_search.best_score_)) # RMSE
@@ -69,13 +71,17 @@ param_grid = [
     {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]}, 
     {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]}
 ]
-tuned_random_forest = grid_search(features, target, RandomForestRegressor(), param_grid)  # max_features: 2 and n_estimators: 30 is optimal
+tuned_random_forest = grid_search(features, target, RandomForestRegressor(random_state=random_state), param_grid)  # max_features: 2 and n_estimators: 30 is optimal
+tuned_min_random_forest = grid_search(min_features, target, RandomForestRegressor(random_state=random_state), param_grid) # max_features: 4 and n_estimators: 30 is optimal
 
 # %%
-regression(housing[['MedInc']], target, RandomForestRegressor()) # RMSE is 97k
-regression(features, target, RandomForestRegressor()) # Untuned, 51k
-regression(features, target, tuned_random_forest) # Consistently better, 50k
+regression(housing[['MedInc']], target, RandomForestRegressor(random_state=random_state)) # RMSE is 97k
+regression(features, target, RandomForestRegressor(random_state=random_state)) # Untuned, 51k
+regression(features, target, tuned_random_forest) # Consistently better tuned, 50k
+regression(min_features, target, RandomForestRegressor(random_state=random_state)) # Untuned 48.5k
+regression(min_features, target, tuned_min_random_forest) # Tuned 49k
 
 # %% 
 regression(housing[['MedInc']], target, linear_model.LinearRegression()) # 83k
 regression(features, target, linear_model.LinearRegression()) # 72k
+regression(min_features, target, linear_model.LinearRegression()) # 73k
