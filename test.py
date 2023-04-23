@@ -131,11 +131,11 @@ def get_user_input():
     return rooms, lat, lng, income / 10000
 
 # %% 
-def predict_housing_price():
+def predict_property_value():
     rooms, lat, lng, income = get_user_input()
     user_input = pd.DataFrame({'MedInc': [income], 'AveRooms': [rooms], 'Latitude': [lat], 'Longitude': [lng]})
     prediction = tuned_min_random_forest.predict(user_input)
     print(f"Your house is estimated to be worth ${prediction[0] * 100000:.2f} dollars.")
 
 # %%
-predict_housing_price()
+predict_property_value()
