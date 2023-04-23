@@ -12,7 +12,7 @@ import pandas as pd
 # Categorical features removed, missing values were filled, some features combined, 
 # some features were scaled, and others removed entirely
 housing = fetch_california_housing(as_frame=True).frame
-
+correlation_matrix = housing.corr()
 # All features have an importance score of more than .01, so I won't drop any
 features = housing.drop('MedHouseVal', axis=1)
 target = housing[['MedHouseVal']]
@@ -34,17 +34,20 @@ def regression(features, target, model):
 
 # %% 
 print(fetch_california_housing(as_frame=True).DESCR)
+# %%
 housing.info() # No missing values and all features are numeric
+# %%
 housing.head() # First 5 rows of the data
-
+# %%
 # AveOccup, Population, AveRooms, and AveBedrms have insane maximum values
 # A histogram or distribution plot would show that the data is skewed
 housing.describe() # Describes the dataset
 
 # A heatmap or scatter plots would be nice to show correlations as well
 # I have no idea what features are correlated with the target yet
-correlation_matrix = housing.corr()
+# %%
 print(correlation_matrix)
+# %%
 print(correlation_matrix['MedHouseVal'].sort_values(ascending=False))
 
 # %%
@@ -70,5 +73,7 @@ tuned_random_forest = grid_search(features, target, RandomForestRegressor(), par
 regression(housing[['MedInc']], target, RandomForestRegressor()) # RMSE is 97k
 regression(features, target, RandomForestRegressor()) # Untuned, 51k
 regression(features, target, tuned_random_forest) # Consistently better, 50k
+
+# %% 
 regression(housing[['MedInc']], target, linear_model.LinearRegression()) # 83k
 regression(features, target, linear_model.LinearRegression()) # 72k
