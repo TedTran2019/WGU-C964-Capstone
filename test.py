@@ -19,6 +19,7 @@ random_state = 964
 # All features have an importance score of more than .01, so I won't drop any
 features = housing.drop('MedHouseVal', axis=1)
 min_features = housing[['MedInc', 'AveRooms', 'Latitude', 'Longitude']]
+bare_min_features = housing[['MedInc', 'Latitude', 'Longitude']]
 target = housing['MedHouseVal']
 
 def regression(features, target, model):
@@ -60,7 +61,7 @@ print(correlation_matrix['MedHouseVal'].sort_values(ascending=False))
 def grid_search(features, target, model, param_grid):
     features_train, features_test, target_train, target_test = model_selection.train_test_split(
         features, target, test_size=0.3, random_state=random_state)
-    grid_search = model_selection.GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error', random_state=random_state)
+    grid_search = model_selection.GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error')
     grid_search.fit(features_train, target_train)
     print(grid_search.best_params_)
     print(np.sqrt(-grid_search.best_score_)) # RMSE
@@ -73,15 +74,18 @@ param_grid = [
 ]
 tuned_random_forest = grid_search(features, target, RandomForestRegressor(random_state=random_state), param_grid)  # max_features: 2 and n_estimators: 30 is optimal
 tuned_min_random_forest = grid_search(min_features, target, RandomForestRegressor(random_state=random_state), param_grid) # max_features: 4 and n_estimators: 30 is optimal
-
+tuned_bare_min_random_forest = grid_search(bare_min_features, target, RandomForestRegressor(random_state=random_state), param_grid) # max_features: 4 and n_estimators: 30 is optimal
 # %%
 regression(housing[['MedInc']], target, RandomForestRegressor(random_state=random_state)) # RMSE is 97k
 regression(features, target, RandomForestRegressor(random_state=random_state)) # Untuned, 51k
 regression(features, target, tuned_random_forest) # Consistently better tuned, 50k
 regression(min_features, target, RandomForestRegressor(random_state=random_state)) # Untuned 48.5k
 regression(min_features, target, tuned_min_random_forest) # Tuned 49k
+regression(bare_min_features, target, RandomForestRegressor(random_state=random_state)) # 49k
+regression(bare_min_features, target, tuned_bare_min_random_forest) # 49.5k
 
 # %% 
 regression(housing[['MedInc']], target, linear_model.LinearRegression()) # 83k
 regression(features, target, linear_model.LinearRegression()) # 72k
 regression(min_features, target, linear_model.LinearRegression()) # 73k
+regression(bare_min_features, target, linear_model.LinearRegression()) # 73k
