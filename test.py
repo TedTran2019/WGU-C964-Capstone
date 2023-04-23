@@ -22,7 +22,7 @@ target = housing['MedHouseVal']
 def regression(features, target, model):
     features_train, features_test, target_train, target_test = model_selection.train_test_split(
         features, target, test_size=0.3, random_state=964)
-    model.fit(features_train, target_train)
+    model.fit(features_train, target_train) # Unnecessary if used grid_search
     # Importances can be plotted with a bar chart
     # importances = model.feature_importances_
     # importances = pd.DataFrame({'feature': features.columns, 'importance': np.round(importances, 3)})
@@ -32,7 +32,8 @@ def regression(features, target, model):
         target_test, target_prediction, squared=False)
     # comparison = pd.DataFrame({'Actual': target_test.values.flatten(), 'Predicted': target_prediction.flatten()})
     # print(comparison)
-    print(model_RMSE * 100000)
+    avg_error = round(model_RMSE * 100000, 2)
+    print(f"On average, house estimation values are ${avg_error:.2f} off.")
 
 # %% 
 print(fetch_california_housing(as_frame=True).DESCR)
