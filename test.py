@@ -89,3 +89,53 @@ regression(housing[['MedInc']], target, linear_model.LinearRegression()) # 83k
 regression(features, target, linear_model.LinearRegression()) # 72k
 regression(min_features, target, linear_model.LinearRegression()) # 73k
 regression(bare_min_features, target, linear_model.LinearRegression()) # 73k
+
+# %%
+def get_user_input():
+    while True:
+        try:
+            rooms = float(input("Enter number of rooms: "))
+            if rooms < 0:
+                raise ValueError("Number of rooms can't be negative.")
+            break
+        except ValueError as e:
+            print(f"Error: {e}")
+
+    while True:
+        try:
+            lat = float(input("Enter latitude(32.5 - 42): "))
+            if lat < 32.5 or lat > 42:
+                raise ValueError("Latitude must be between 32.5 and 42.")
+            break
+        except ValueError as e:
+            print(f"Error: {e}")
+
+    while True:
+        try:
+            lng = float(input("Enter longitude(-124.65 - -114.13): "))
+            if lng < -124.65 or lng > -114.13:
+                raise ValueError("Longitude must be between -124.65 and -114.13.")
+            break
+        except ValueError as e:
+            print(f"Error: {e}")
+
+    while True:
+        try:
+            income = float(input("Enter yearly income of current/previous household: "))
+            if income < 0:
+                raise ValueError("Income can't be negative.")
+            break
+        except ValueError as e:
+            print(f"Error: {e}")
+
+    return rooms, lat, lng, income / 10000
+
+# %% 
+def predict_housing_price():
+    rooms, lat, lng, income = get_user_input()
+    user_input = pd.DataFrame({'MedInc': [income], 'AveRooms': [rooms], 'Latitude': [lat], 'Longitude': [lng]})
+    prediction = tuned_min_random_forest.predict(user_input)
+    print(f"Your house is estimated to be worth ${prediction[0] * 100000:.2f} dollars.")
+
+# %%
+predict_housing_price()
